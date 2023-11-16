@@ -34,8 +34,10 @@ def main():
 
     args = parser.parse_args()
 
-    # Convert the list of files to a list of paths
+    # Convert the list of files to a list of paths, possibly redundant
     txt_files_list = [Path(file) for file in args.txt_input_files]
+    # sort by date, can just sort sting, if take filename
+    txt_files_list = sorted(txt_files_list, key=lambda x: x.stem)
 
     # Create a TexDocument object and generate/save the LaTeX content
     tex_document = TexDocument(
