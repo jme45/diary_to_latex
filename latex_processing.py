@@ -120,6 +120,11 @@ class TexDocument:
         else:
             self.output_file_name = None
 
+        # initialise an empty list with chapter names
+        self.chapters = []
+        # initialise last chapter name as None
+        self.last_chapter_name = None
+
     def generate(self):
         # Initialize the LaTeX document string with the preamble
         latex_content = self._read_file_content(self.preamble_file_name)
@@ -135,6 +140,7 @@ class TexDocument:
 
         # Iterate through each txt file, generate TextFile object, and add to the LaTeX content
         for txt_file in self.txt_files:
+            latex_content += self._chapter_string(txt_file)
             text_file = TextFile(txt_file)
             try:
                 latex_content += text_file.to_latex() + "\n"  ###.encode()
@@ -161,6 +167,45 @@ class TexDocument:
                 return file.read()  ###.encode('utf-8')
         except FileNotFoundError:
             raise FileNotFound(f"File '{filename}' not found.")
+
+    @staticmethod
+    def _chapter_name_from_txt_file(txt_file: Path):
+        """
+        Chapter name is determined by parent directory.
+
+        It removes the diary_ part of the directory, replaces
+        underscore with space and capitalises the first letters.
+        :param txt_file:
+        :return: directory name
+        """
+        parent = txt_file.parent.stem
+        cmpts = parent.split("_")
+        assert cmpts[0] == "diary", "each directory must be called 'diary_...' "
+
+        chapter_name = " ".join(c.title() for c in cmpts[1:])
+
+        return chapter_name
+
+    def _chapter_string(self, txt_file):
+        """
+        Return "\chapter{new_chapter_name}" if a new chapter name is needed.
+
+        Get the name for the new chapter. If it's the same as for the previous
+        chapter, return "" and do nothing. If it's different, add the name
+        of the new chapter to the list of chapters, update
+        self.last_chapter_name and return a latex string to start a new chapter.
+
+        :param txt_file: name of the text file
+        :return: "\chapter{NEW_CHAPTER_NAME}\n" or ""
+        """
+
+        chapter_name = self._chapter_name_from_txt_file(txt_file)
+        if chapter_name == self.last_chapter_name:
+            return ""
+        else:
+            self.chapters.append(chapter_name)
+            self.last_chapter_name = chapter_name
+            return f"\chapter{{{chapter_name}}}\n\n"
 
 
 if __name__ == "__main__":
