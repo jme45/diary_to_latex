@@ -5,7 +5,6 @@ Main function for running diary to latex conversion.
 import argparse
 import pathlib
 from pathlib import Path
-import glob
 from latex_processing import TexDocument, FileNotFound
 
 
@@ -29,17 +28,21 @@ def main():
     parser.add_argument(
         "--output_file_name",
         type=str,
-        help="Output file name for the generated LaTeX document.",
+        help=(
+            "Output file name for the generated LaTeX document. "
+            "If not provided, print output to screen."
+        ),
     )
 
     args = parser.parse_args()
 
-    # Convert the list of files to a list of paths, possibly redundant
+    # Convert the list of files to a list of paths, possibly redundant.
     txt_files_list = [Path(file) for file in args.txt_input_files]
-    # sort by date, can just sort sting, if take filename
+
+    # Sort by date, can just sort string, if take filename (stem of Path).
     txt_files_list = sorted(txt_files_list, key=lambda x: x.stem)
 
-    # Create a TexDocument object and generate/save the LaTeX content
+    # Create a TexDocument object and generate/save the LaTeX content.
     tex_document = TexDocument(
         txt_files_list, args.preamble_file, args.output_file_name
     )
