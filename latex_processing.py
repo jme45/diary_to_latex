@@ -143,7 +143,7 @@ class TexDocument:
 
     def __init__(
         self,
-        txt_file_names: list[str],
+        txt_file_names: list[Path],
         preamble_file_name: str,
         output_file_name: Optional[str],
     ):
